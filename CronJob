@@ -1,0 +1,40 @@
+	1. go to cronjob.yaml (/root/kubernetes-training/04-controllers)
+
+[root@ip-172-31-23-28 04-controllers]# pwd
+/root/kubernetes-training/04-controllers
+[root@ip-172-31-23-28 04-controllers]#
+
+
+	2. Open the file and change the 1st line to (apiVersion: batch/v1beta1).
+
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: batch-job-every-fifteen-minutes
+spec:
+
+	3. Run this file
+
+[root@ip-172-31-23-28 04-controllers]# kubectl apply -f cronjob.yaml
+cronjob.batch/batch-job-every-fifteen-minutes created
+[root@ip-172-31-23-28 04-controllers]#
+
+	4. find out what is the command to "get" the running jobs.
+
+[root@ip-172-31-23-28 04-controllers]# kubectl get cronjob
+NAME                              SCHEDULE             SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+batch-job-every-fifteen-minutes   0,15,30,45 * * * *   False     0        <none>          49s
+[root@ip-172-31-23-28 04-controllers]#
+
+Also identify how you would "permanently arrest" the jobs from running.
+
+[root@ip-172-31-23-28 04-controllers]# kubectl delete cronjob batch-job-every-fifteen-minutes
+cronjob.batch "batch-job-every-fifteen-minutes" deleted
+[root@ip-172-31-23-28 04-controllers]#
+
+
+What is the change from normal Jobs (jobs v/s cronJobs) - Your observation in one sentence.
+
+In Normal job we need to run command/jobs/scripts manually and in Cronjob script/job/command will run automatically without manual interfere as per time schedule on it.   
+
+
