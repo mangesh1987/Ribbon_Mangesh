@@ -1,0 +1,84 @@
+
+Compare the kubia-rc.yaml (/root/kubernetes-training/04-controllers) and the kubia-replicaset.yaml (/root/kubernetes-training/05-services).
+	1. What are the differences file-wise?
+	2. Run the kubia-replicaset.yaml .
+	3. Identify what commands can be run after "kubectl apply...."
+	4. Make a service over these pods (kubia-replicaset) and see if the service picks up the web-service within the pod ("You have hit....." message)
+	5. Negative Testing : change the labels of the pod and see if the service is still applied on those pods
+
+
+	1. File wise difference
+
+[root@ip-172-31-23-28 05-services]# sdiff kubia-replicaset.yaml /root/kubernetes-training/04-controllers/kubia-rc.yaml
+apiVersion: apps/v1                                           | apiVersion: v1
+kind: ReplicaSet                                              | kind: ReplicationController
+metadata:                                                       metadata:
+  name: kubia                                                 |   name: kubia2
+spec:                                                           spec:
+  replicas: 3                                                     replicas: 3
+  selector:                                                       selector:
+    matchLabels:                                              |     app: kubia
+      app: kubia                                              <
+  template:                                                       template:
+    metadata:                                                       metadata:
+      labels:                                                         labels:
+        app: kubia                                                      app: kubia
+    spec:                                                           spec:
+      containers:                                                     containers:
+      - name: kubia                                                   - name: kubia
+        image: luksa/kubia                                              image: luksa/kubia
+                                                              >         ports:
+                                                              >         - containerPort: 8080
+[root@ip-172-31-23-28 05-services]#
+
+[root@ip-172-31-23-28 ~]# kubectl get rc
+NAME     DESIRED   CURRENT   READY   AGE
+kubia2   3         3         3       5d1h
+
+
+Replica Set and Replica Controllers both are used to create replicas of pods. Only difference I found is match Label. 
+
+
+	2. Run the kubia-replicaset.yaml .
+
+[root@ip-172-31-23-28 05-services]# kubectl apply -f kubia-replicaset.yaml
+replicaset.apps/kubia created
+[root@ip-172-31-23-28 05-services]# 
+
+[root@ip-172-31-23-28 05-services]# kubectl get po |grep kubia
+kubia-0                                            1/1     Running     0          3m22s
+kubia-1                                            1/1     Running     0          3m9s
+kubia-2                                            1/1     Running     0          2m47s
+
+	3. Identify what commands can be run after "kubectl apply...."
+
+We can run -f with yaml file like in above steps
+kubectl apply -f kubia-replicaset.yaml
+
+	4. Make a service over these pods (kubia-replicaset) and see if the service picks up the web-service within the pod ("You have hit....." message)
+
+Create service 
+[root@ip-172-31-23-28 05-services]# kubectl apply -f kubia-svc.yaml
+service/kubia2 created
+[root@ip-172-31-23-28 05-services]#
+
+[root@ip-172-31-23-28 05-services]# kubectl get svc
+NAME             TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+db               ClusterIP   10.105.123.247   <none>        5432/TCP         5d20h
+kubia-nodeport   NodePort    10.100.244.205   <none>        80:30123/TCP     5d21h
+kubia2           ClusterIP   10.99.10.99      <none>        80/TCP           27s
+redis            ClusterIP   10.104.73.41     <none>        6379/TCP         5d20h
+result           NodePort    10.109.106.224   <none>        5001:31001/TCP   5d20h
+vote             NodePort    10.97.0.60       <none>        5000:31000/TCP   5d20h
+[root@ip-172-31-23-28 05-services]# curl 10.99.10.99:80
+You've hit kubia-59g82
+
+	5. Negative Testing : change the labels of the pod and see if the service is still applied on those pods
+	
+	overwrite the label of pod and found new pod is created with new label
+	
+	
+	[root@ip-172-31-23-28 04-controllers]# curl 10.99.10.99:80
+	You've hit kubia-lp894
+	[root@ip-172-31-23-28 04-controllers]#
+	
