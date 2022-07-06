@@ -1,0 +1,148 @@
+FIRST : Take the voting app presentation (PPT) and understand the landscape of the application.
+
+1. go to root (cd /root/ ) . (both Master and Worker can perform this in their instances)
+2. git clone https://github.com/ashishrpandey/example-voting-app
+3. go to /root/example-voting-app/k8s-specifications
+4. [root@ip-172-31-7-102 k8s-specifications]# kubectl apply -f .
+5. for voting and result pods, Observe that NodePort is assigned.
+6. take your publicIP (your instance IP) : NodePort ► open 2 browsers , one for VOTING and one for Results.
+7 try voting and see the results paralelly in results page.
+
+8. Now try to delete the Pods one by one (first voting Pod, then worker pod, then db pod) and see what happens to the voting and result app after deleting.
+
+9 Write your observations in a text file.
+10. what happens after db pod deletion. 
+11. complete the assignment by making the result pod work. (if you delete db pod, results would not be captured.So repeat what we did in the class in order to make the result pod work.).
+12. Write in the text file, what you did in order to make the result pod work.
+
+
+upload the TEXT file , containing ALL your observations in the gitHub. Share the gitHub link in the Assignment page in edYoda.
+
+in summary, your text file should contain:
+1. Commands that you used during the assignment.
+2. snapshot of logs (wherever possible)
+3. your comment on WHY result app STOPPED working after db pod stop
+4. your answer to HOW YOU MADE THE RESULT POD work. 
+5. Some jargons (just names are enough- dont need sentences) that you learnt from the 40-hour Training session
+
+
+
+
+
+
+
+
+1.go to root (cd /root/ ) . (both Master and Worker can perform this in their instances)
+
+[root@ip-172-31-23-28 ~]# pwd
+/root
+[root@ip-172-31-23-28 ~]#
+
+
+2. git clone https://github.com/ashishrpandey/example-voting-app
+
+[root@ip-172-31-23-28 ~]# git clone https://github.com/ashishrpandey/example-voting-app
+Cloning into 'example-voting-app'...
+remote: Enumerating objects: 494, done.
+remote: Total 494 (delta 0), reused 0 (delta 0), pack-reused 494
+Receiving objects: 100% (494/494), 236.17 KiB | 1.43 MiB/s, done.
+Resolving deltas: 100% (179/179), done.
+[root@ip-172-31-23-28 ~]#
+
+
+3. go to /root/example-voting-app/k8s-specifications
+
+[root@ip-172-31-23-28 ~]# cd example-voting-app/k8s-specifications/
+[root@ip-172-31-23-28 k8s-specifications]# pwd
+/root/example-voting-app/k8s-specifications
+[root@ip-172-31-23-28 k8s-specifications]#
+
+
+4. [root@ip-172-31-7-102 k8s-specifications]# kubectl apply -f .
+
+[root@ip-172-31-23-28 k8s-specifications]# kubectl apply -f .
+deployment.apps/db created
+service/db created
+deployment.apps/redis created
+service/redis created
+deployment.apps/result created
+service/result created
+deployment.apps/vote created
+service/vote created
+deployment.apps/worker created
+[root@ip-172-31-23-28 k8s-specifications]#
+
+
+5. for voting and result pods, Observe that NodePort is assigned.
+
+
+NAME                     TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/db               ClusterIP   10.104.11.119    <none>        5432/TCP         38s
+service/kubia-nodeport   NodePort    10.100.244.205   <none>        80:30123/TCP     5d22h
+service/kubia2           ClusterIP   10.99.10.99      <none>        80/TCP           84m
+service/redis            ClusterIP   10.104.224.91    <none>        6379/TCP         38s
+service/result           NodePort    10.104.156.155   <none>        5001:31001/TCP   37s
+service/vote             NodePort    10.96.250.38     <none>        5000:31000/TCP   37s
+
+
+6. take your publicIP (your instance IP) : NodePort ► open 2 browsers , one for VOTING and one for Results.
+
+
+
+
+
+
+7 try voting and see the results parallelly in results page.
+
+
+
+
+8. Now try to delete the Pods one by one (first voting Pod, then worker pod, then db pod) and see what happens to the voting and result app after deleting.
+
+Deleted voting pod:  found new pod created itself and there is no any impact on voting and result page.
+
+[root@ip-172-31-23-28 k8s-specifications]# kubectl delete po vote-94849dc97-n4lrl
+pod "vote-94849dc97-n4lrl" deleted
+
+
+vote-94849dc97-n4lrl                               1/1     Terminating         0          6m17s
+vote-94849dc97-zclfp                               0/1     ContainerCreating   0          12s
+
+Deleted worker pod: found new pod created itself and there is no any impact on voting and result page
+
+[root@ip-172-31-23-28 k8s-specifications]# kubectl delete po worker-dd46d7584-8gmhp
+pod "worker-dd46d7584-8gmhp" deleted
+
+worker-dd46d7584-8gmhp                             1/1     Terminating   2          9m22s
+worker-dd46d7584-pfsrh                             1/1     Running       0          19s
+
+Deleted db pod: found new pod created itself but on result page it shows 50-50 on every time means voting count is updated.
+
+[root@ip-172-31-23-28 k8s-specifications]# kubectl delete po db-b54cd94f4-94w6z
+pod "db-b54cd94f4-94w6z" deleted
+
+
+db-b54cd94f4-94w6z                                 1/1     Terminating   0          11m
+db-b54cd94f4-lhgnf                                 1/1     Running       0          22s
+
+
+
+
+
+11. complete the assignment by making the result pod work. (if you delete db pod, results would not be captured.So repeat what we did in the class in order to make the result pod work.).
+
+
+I deleted result pod and after that voting counting is working fine
+
+[root@ip-172-31-23-28 ~]# kubectl delete po result-5d57b59f4b-mzvkj
+pod "result-5d57b59f4b-mzvkj" deleted
+
+
+result-5d57b59f4b-km54c                            1/1     Running       0          19s
+result-5d57b59f4b-mzvkj                            1/1     Terminating   0          21m
+
+
+	
+
+
+
